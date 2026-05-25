@@ -2,7 +2,7 @@ package br.zire.rkiapp.crypto;
 
 import android.content.Context;
 
-import com.pos.tectoy.sdk.PosSecurityManager;
+import com.pos.tectoy.security.PosSecurityManager;
 
 import br.zire.rkiapp.MainActivity;
 import br.zire.rkiapp.rkl.RklSessionContext;

@@ -4,10 +4,10 @@ import android.content.Context;
 import android.util.Log;
 import android.widget.Toast;
 
-import com.pos.tectoy.sdk.EPedReturnsSP;
-import com.pos.tectoy.sdk.PedKeyInfo;
-import com.pos.tectoy.sdk.PedKcvInfo;
-import com.pos.tectoy.sdk.PosSecurityManager;
+import com.pos.tectoy.security.PedKcvInfo;
+import com.pos.tectoy.security.PedKeyInfo;
+import com.pos.tectoy.security.PosSecurityManager;
+import com.pos.tectoy.security.enums.EPedReturnsSP;
 
 import java.nio.charset.StandardCharsets;
 

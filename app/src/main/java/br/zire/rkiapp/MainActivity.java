@@ -15,7 +15,11 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.pos.tectoy.sdk.PosSystemManager;
+import com.pos.tectoy.deviceinfo.SPIDeviceInfo;
+import com.pos.tectoy.sys.enums.ETermInfoKeySP;
+
+import java.util.Map;
+
 import br.zire.rkiapp.network.RklHttpClient;
 import br.zire.rkiapp.rkl.RklFlowManager;
 import br.zire.rkiapp.util.Logger;
@@ -66,8 +70,13 @@ public class MainActivity extends AppCompatActivity {
 //        USN = getString(R.string.usn_default); //Regatando USN padrão - MOCK
 
         try {
-            PosSystemManager sysManager = PosSystemManager.getDefault();
-            getSn = sysManager.getSerialNumber();
+            String str = null;
+            SPIDeviceInfo spiDeviceInfo = SPIDeviceInfo.getInstance();
+
+            Map<ETermInfoKeySP, String> infoTerminal = spiDeviceInfo.getTermInfoSP();
+            str = infoTerminal.get(ETermInfoKeySP.SN);
+
+            getSn = str;
             if (getSn == null || getSn.isEmpty()) {
                 getSn = "UNKNOWN_SN";
             }
