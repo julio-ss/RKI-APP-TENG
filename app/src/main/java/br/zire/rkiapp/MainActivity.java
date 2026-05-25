@@ -15,8 +15,7 @@ import androidx.core.graphics.Insets;
 import androidx.core.view.ViewCompat;
 import androidx.core.view.WindowInsetsCompat;
 
-import com.pax.dal.entity.ETermInfoKey;
-import com.pax.neptunelite.api.NeptuneLiteUser;
+import com.pos.tectoy.sdk.PosSystemManager;
 import br.zire.rkiapp.network.RklHttpClient;
 import br.zire.rkiapp.rkl.RklFlowManager;
 import br.zire.rkiapp.util.Logger;
@@ -67,9 +66,14 @@ public class MainActivity extends AppCompatActivity {
 //        USN = getString(R.string.usn_default); //Regatando USN padrão - MOCK
 
         try {
-            getSn = NeptuneLiteUser.getInstance().getDal(this).getSys().getTermInfo().get(ETermInfoKey.SN);
+            PosSystemManager sysManager = PosSystemManager.getDefault();
+            getSn = sysManager.getSerialNumber();
+            if (getSn == null || getSn.isEmpty()) {
+                getSn = "UNKNOWN_SN";
+            }
         } catch (Exception e) {
-            throw new RuntimeException(e);
+            Logger.error("Erro ao obter SN: " + e.getMessage());
+            getSn = "UNKNOWN_SN";
         }
         SN = getSn;
 

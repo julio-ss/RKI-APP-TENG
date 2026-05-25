@@ -161,4 +161,23 @@ public class RklSessionContext {
         return kcvMismatch;
     }
 
+    //-----------------------------------------
+    // KCV LOOKUP BY INDEX
+    //-----------------------------------------
+
+    public static String getKcvForIndex(int index) {
+        // Lookup de KCV baseado no índice
+        // Prioritário: mkProfileKey e bdkProfileKey
+
+        if (mkProfileKey != null && mkProfileKey.slotTargetPhy == index) {
+            return mkTr31kcv;
+        }
+
+        if (bdkProfileKey != null && bdkProfileKey.slotTargetPhy == index) {
+            return bdkTr31kcv;
+        }
+
+        return null;
+    }
+
 }

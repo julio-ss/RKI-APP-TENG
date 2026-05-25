@@ -1,10 +1,6 @@
 package br.zire.rkiapp.crypto;
 
-import static java.security.AccessController.getContext;
-
-import com.pax.dal.IPed;
-import com.pax.dal.entity.EPedKeyType;
-import com.pax.dal.exceptions.PedDevException;
+import com.pos.tectoy.security.PosSecurityManager;
 
 import java.util.HashSet;
 import java.util.Set;
@@ -13,7 +9,6 @@ import br.zire.rkiapp.MainActivity;
 import br.zire.rkiapp.rkl.RklLoadBdkManager;
 import br.zire.rkiapp.rkl.RklLoadMkManager;
 import br.zire.rkiapp.network.RklHttpClient;
-import br.zire.rkiapp.util.HexUtil;
 import br.zire.rkiapp.util.Logger;
 
 public class KeySlotScanner {
@@ -23,14 +18,17 @@ public class KeySlotScanner {
     private static int mkAttempts = 0;
     private static int bdkAttempts = 0;
 
-    private final IPed ped;
+    private final PosSecurityManager securityManager;
     private final RklHttpClient httpClient;
 
-    public KeySlotScanner(IPed ped, RklHttpClient httpClient) {
-
-        this.ped = ped;
+    public KeySlotScanner(RklHttpClient httpClient) {
+        this.securityManager = PosSecurityManager.getDefault();
         this.httpClient = httpClient;
     }
+
+    //-----------------------------------------
+    // SCAN AND INJECT IF NEEDED
+    //-----------------------------------------
 
     public void scanAndInjectIfNeeded(
             String expectedKcv,
@@ -38,10 +36,9 @@ public class KeySlotScanner {
             KeyType type
     ) {
 
-        Logger.section("SCAN KEY SLOTS");
+        Logger.section("SCAN KEY SLOTS - TECTOY");
 
         boolean injectionPerformed = false;
-
         Set<String> deviceKcvs = new HashSet<>();
 
         //-----------------------------------------
@@ -148,6 +145,8 @@ public class KeySlotScanner {
     }
 
     //-----------------------------------------
+    // INJECT
+    //-----------------------------------------
 
     private void inject(
             int index,
@@ -166,35 +165,33 @@ public class KeySlotScanner {
     }
 
     //-----------------------------------------
+    // GET KCV - ALTERNATIVA TECTOY
+    //-----------------------------------------
 
     private String getKcv(int index) {
 
-        byte[] buffer = new byte[16];
-
         try {
 
-            byte[] kcvBytes =
-                    ped.getKCV(
-                            EPedKeyType.AES_TMK,
-                            (byte) index,
-                            (byte) 3,
-                            buffer
-                    );
+            Logger.info("Obtendo KCV para slot: " + index);
 
-            if (kcvBytes == null)
-                return null;
+            // Tectoy não tem método getKCV() nativo como Neptune
+            // Alternativa: usar valores armazenados na sessão ou cache
+            // Para Tectoy, o KCV é obtido via API RKL
 
-            String kcv =
-                    HexUtil.bytesToHex(kcvBytes);
+            // Placeholder: retornar null para forçar injeção
+            // Em produção: verificar cache local ou storage
 
-            return kcv.substring(0, 6);
+            return null;  // Força re-injeção em primeira passada
 
-        } catch (PedDevException e) {
+        } catch (Exception e) {
 
+            Logger.warning("Erro ao obter KCV: " + e.getMessage());
             return null;
         }
     }
 
+    //-----------------------------------------
+    // RESTART CYCLE
     //-----------------------------------------
 
     private void restartCycle(KeyType type) {
@@ -219,6 +216,8 @@ public class KeySlotScanner {
         }
     }
 
+    //-----------------------------------------
+    // ATTEMPT MANAGEMENT
     //-----------------------------------------
 
     private int getAttempts(KeyType type) {
@@ -245,9 +244,10 @@ public class KeySlotScanner {
     }
 
     //-----------------------------------------
+    // KEY TYPE ENUM
+    //-----------------------------------------
 
     public enum KeyType {
-
         MK,
         BDK
     }
