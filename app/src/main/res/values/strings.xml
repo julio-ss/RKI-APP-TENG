@@ -1,0 +1,26 @@
+<resources>
+    <string name="app_name">RKI APP</string>
+
+    <string name="success_server">Conectado ao servidor</string>
+    <string name="fail_server">Falha ao nonectado no servidor</string>
+
+    <string name="usn_default">1B6980200809F90FFD09029855</string>
+
+    <string name="ephemer_cert_endpoint">http://177.69.0.84:56488/v1/rkl/cert-ephemere</string>
+    <string name="health_endpoint">http://177.69.0.84:56488/v1/health</string>
+    <string name="sn_details_endpoint">http://177.69.0.84:56488/v1/rkl/serial-number-details/</string>
+    <string name="auth_endpoint">http://177.69.0.84:56488/v1/auth/token</string>
+    <string name="cert_chain_endpoint">http://177.69.0.84:56488/v1/rkl/cert-chain</string>
+    <string name="cert_issue_endpoint">http://177.69.0.84:56488/v1/rkl/cert-issue</string>
+    <string name="sn_update_endpoint">http://177.69.0.84:56488/v1/rkl/serial-number-update-status</string>
+    <string name="load_kbpk_endpoint">http://177.69.0.84:56488/v1/rkl/load-kbpk</string>
+    <string name="load_bdk_endpoint">http://177.69.0.84:56488/v1/rkl/load-bdk</string>
+    <string name="load_mk_endpoint">http://177.69.0.84:56488/v1/rkl/load-mk</string>
+<!--    <string name="profiles_endpoint">http://177.69.0.84:56488/v1/rkl-profiles</string>-->
+
+    <string name="profiles_endpoint">http://200.160.162.200:5059/v1/rkl-profiles/</string>
+
+    <string name="security_msg_1">✅Mantenha o terminal conectado à tomada.\n</string>
+    <string name="security_msg_2">✅Não interrompa a conexão\ncom a internet.</string>
+    <string name="security_msg_3">✅Em caso de falha, reincie\no processo de sincronização.</string>
+</resources>
