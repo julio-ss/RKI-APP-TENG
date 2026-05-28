@@ -23,6 +23,10 @@ public class RklProfileKey {
         return keyFuncId == 1;
     }
 
+    public boolean isBdk() {
+        return !isMk();
+    }
+
     public boolean isDukpt() {
         return keyFuncId == 2;
     }

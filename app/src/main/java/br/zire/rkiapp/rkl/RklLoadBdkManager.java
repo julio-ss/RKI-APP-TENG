@@ -8,6 +8,7 @@ import br.zire.rkiapp.MainActivity;
 import br.zire.rkiapp.R;
 import br.zire.rkiapp.crypto.KeyInjectionManager;
 import br.zire.rkiapp.network.RklHttpClient;
+import br.zire.rkiapp.rkl.model.RklProfileKey;
 import br.zire.rkiapp.util.HexUtil;
 import br.zire.rkiapp.util.Logger;
 
@@ -26,33 +27,43 @@ public class RklLoadBdkManager {
     }
 
     //-----------------------------------------
-    // LOAD BDK
+    // LOAD BDK (SEM PARÂMETRO)
     //-----------------------------------------
 
     public boolean loadBdk() {
+        return loadBdkInternal(null);
+    }
+
+    //-----------------------------------------
+    // LOAD BDK (COM PARÂMETRO)
+    //-----------------------------------------
+
+    public boolean loadBdk(RklProfileKey profileKey) {
+        return loadBdkInternal(profileKey);
+    }
+
+    //-----------------------------------------
+    // LOAD BDK (INTERNO)
+    //-----------------------------------------
+
+    private boolean loadBdkInternal(RklProfileKey profileKeyParam) {
 
         try {
 
             Logger.section("LOAD BDK - TECTOY");
 
             //-----------------------------------------
-            // VALIDAÇÕES
+            // USAR CONTEXTO OU PARÂMETRO
             //-----------------------------------------
 
-            if (RklSessionContext.dataKeyLabel == null
-                    || RklSessionContext.dataKeyLabel.isEmpty()) {
+            RklProfileKey bdkKey = profileKeyParam != null
+                    ? profileKeyParam
+                    : RklSessionContext.bdkProfileKey;
 
+            if (bdkKey == null) {
                 Logger.error("BDK profile key não carregada");
                 return false;
             }
-
-            RklSessionContext.identifierKeyToBeLoad =
-                    RklSessionContext.dataKeyLabel;
-
-            Logger.section("SESSION CONTEXT");
-
-            Logger.info("dataKeyLabel: " + RklSessionContext.dataKeyLabel);
-            Logger.info("slotTargetPhy: " + RklSessionContext.bdkProfileKey.slotTargetPhy);
 
             //-----------------------------------------
             // PAYLOAD DA REQUISIÇÃO
@@ -65,18 +76,15 @@ public class RklLoadBdkManager {
 
             payload.put("usn", MainActivity.USN);
             payload.put("configName", CONFIG_NAME);
-            payload.put("identifierKeyToBeLoad",
-                    RklSessionContext.identifierKeyToBeLoad);
+            payload.put("identifierKeyToBeLoad", bdkKey.label);
 
             payload.put("deviceKeySlot",
-                    String.format("%02d",
-                            RklSessionContext.bdkProfileKey.slotTargetPhy));
+                    String.format("%02d", bdkKey.slotTargetPhy));
 
             payload.put("slotHsmB64", SLOT_HSM_B64);
             payload.put("tokenHsmB64", TOKEN_HSM_B64);
 
-            payload.put("ksi",
-                    RklSessionContext.bdkProfileKey.ksi);
+            payload.put("ksi", bdkKey.ksi);
 
             //-----------------------------------------
             // REQUISIÇÃO HTTP
@@ -114,6 +122,7 @@ public class RklLoadBdkManager {
             // ARMAZENAR CONTEXTO
             //-----------------------------------------
 
+            bdkKey.kcv = kcv;
             RklSessionContext.bdkTr31KeyBlock = tr31;
             RklSessionContext.bdkTr31kcv = kcv;
 
@@ -130,7 +139,7 @@ public class RklLoadBdkManager {
             boolean injected = injectionManager.injectTr31(
                     tr31,
                     kcv,
-                    (byte) RklSessionContext.bdkProfileKey.slotTargetPhy
+                    (byte) bdkKey.slotTargetPhy
             );
 
             if (!injected) {
@@ -148,14 +157,5 @@ public class RklLoadBdkManager {
             e.printStackTrace();
             return false;
         }
-    }
-
-    //-----------------------------------------
-    // OBTER VALOR PADRÃO
-    //-----------------------------------------
-
-    public boolean loadBdk(Object profileKey) {
-        // Sobrecarga para compatibilidade
-        return loadBdk();
     }
 }

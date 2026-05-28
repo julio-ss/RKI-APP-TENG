@@ -2,6 +2,8 @@ package br.zire.rkiapp.rkl;
 
 import java.security.PrivateKey;
 import java.security.PublicKey;
+import java.util.ArrayList;
+import java.util.List;
 
 import br.zire.rkiapp.rkl.model.RklProfile;
 import br.zire.rkiapp.rkl.model.RklProfileKey;
@@ -36,6 +38,8 @@ public class RklSessionContext {
     public static int dataKeyIpekSize;
 
     public static RklProfile profile;
+
+    public static List<RklProfileKey> profileKeys = new ArrayList<>();
 
     public static RklProfileKey mkProfileKey;
     public static RklProfileKey bdkProfileKey;
@@ -107,6 +111,8 @@ public class RklSessionContext {
     public static void resetSession() {
 
         Logger.section("RESET SESSION");
+
+        profileKeys.clear();
 
         kbpkHex = null;
         kbpkPlain = null;

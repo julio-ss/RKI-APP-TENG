@@ -15,6 +15,7 @@ import br.zire.rkiapp.crypto.RsaKeyInspector;
 import br.zire.rkiapp.crypto.RsaKeyManager;
 import br.zire.rkiapp.domain.SerialNumberDatails;
 import br.zire.rkiapp.network.RklHttpClient;
+import br.zire.rkiapp.rkl.model.RklProfileKey;
 import br.zire.rkiapp.util.Logger;
 import br.zire.rkiapp.util.UiBridge;
 
@@ -168,29 +169,42 @@ public class RklFlowManager {
                 }
 
                 //------------------------------------
-                // LOAD BDK
+                // LOAD BDK E MK (COM PROFILE KEYS)
                 //------------------------------------
 
-                boolean bdkOk = executeWithRetry(
-                        "LOAD BDK",
-                        () -> loadBdkManager.loadBdk()
-                );
-
-                if (!bdkOk) {
-                    throw new IllegalStateException("Falha BDK");
+                if (RklSessionContext.profileKeys == null || RklSessionContext.profileKeys.isEmpty()) {
+                    throw new IllegalStateException("Nenhuma profile key carregada");
                 }
 
-                //------------------------------------
-                // LOAD MK
-                //------------------------------------
+                for (RklProfileKey profileKey : RklSessionContext.profileKeys) {
 
-                boolean mkOk = executeWithRetry(
-                        "LOAD MK",
-                        () -> loadMkManager.loadMk()
-                );
+                    if (profileKey.isBdk()) {
 
-                if (!mkOk) {
-                    throw new IllegalStateException("Falha MK");
+                        Logger.section("PROCESSANDO BDK: " + profileKey.label);
+
+                        boolean bdkOk = executeWithRetry(
+                                "LOAD BDK",
+                                () -> loadBdkManager.loadBdk(profileKey)
+                        );
+
+                        if (!bdkOk) {
+                            throw new IllegalStateException("Falha BDK: " + profileKey.label);
+                        }
+                    }
+
+                    if (profileKey.isMk()) {
+
+                        Logger.section("PROCESSANDO MK: " + profileKey.label);
+
+                        boolean mkOk = executeWithRetry(
+                                "LOAD MK",
+                                () -> loadMkManager.loadMk(profileKey)
+                        );
+
+                        if (!mkOk) {
+                            throw new IllegalStateException("Falha MK: " + profileKey.label);
+                        }
+                    }
                 }
 
                 //------------------------------------

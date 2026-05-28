@@ -8,6 +8,7 @@ import br.zire.rkiapp.MainActivity;
 import br.zire.rkiapp.R;
 import br.zire.rkiapp.crypto.KeyInjectionManager;
 import br.zire.rkiapp.network.RklHttpClient;
+import br.zire.rkiapp.rkl.model.RklProfileKey;
 import br.zire.rkiapp.util.HexUtil;
 import br.zire.rkiapp.util.Logger;
 
@@ -26,29 +27,41 @@ public class RklLoadMkManager {
     }
 
     //-----------------------------------------
-    // LOAD MK
+    // LOAD MK (SEM PARÂMETRO)
     //-----------------------------------------
 
     public boolean loadMk() {
+        return loadMkInternal(null);
+    }
+
+    //-----------------------------------------
+    // LOAD MK (COM PARÂMETRO)
+    //-----------------------------------------
+
+    public boolean loadMk(RklProfileKey profileKey) {
+        return loadMkInternal(profileKey);
+    }
+
+    //-----------------------------------------
+    // LOAD MK (INTERNO)
+    //-----------------------------------------
+
+    private boolean loadMkInternal(RklProfileKey profileKeyParam) {
 
         try {
 
             Logger.section("LOAD MK - TECTOY");
 
             //-----------------------------------------
-            // VALIDAÇÕES
+            // USAR CONTEXTO OU PARÂMETRO
             //-----------------------------------------
 
-            if (RklSessionContext.mkProfileKey == null) {
+            RklProfileKey mkKey = profileKeyParam != null
+                    ? profileKeyParam
+                    : RklSessionContext.mkProfileKey;
+
+            if (mkKey == null) {
                 Logger.error("MK profile key não carregada");
-                return false;
-            }
-
-            RklSessionContext.identifierKeyToBeLoad =
-                    RklSessionContext.mkProfileKey.label;
-
-            if (RklSessionContext.identifierKeyToBeLoad == null) {
-                Logger.error("identifierKeyToBeLoad não definido");
                 return false;
             }
 
@@ -63,17 +76,14 @@ public class RklLoadMkManager {
 
             payload.put("usn", MainActivity.USN);
             payload.put("configName", CONFIG_NAME);
-            payload.put("identifierKeyToBeLoad",
-                    RklSessionContext.identifierKeyToBeLoad);
+            payload.put("identifierKeyToBeLoad", mkKey.label);
 
             payload.put("headerTR31", "");
 
-            payload.put("ksi",
-                    RklSessionContext.mkProfileKey.ksi);
+            payload.put("ksi", mkKey.ksi);
 
             payload.put("deviceKeySlot",
-                    String.format("%02d",
-                            RklSessionContext.mkProfileKey.slotTargetPhy));
+                    String.format("%02d", mkKey.slotTargetPhy));
 
             payload.put("slotHsmB64", SLOT_HSM_B64);
             payload.put("tokenHsmB64", TOKEN_HSM_B64);
@@ -114,6 +124,7 @@ public class RklLoadMkManager {
             // ARMAZENAR CONTEXTO
             //-----------------------------------------
 
+            mkKey.kcv = kcv;
             RklSessionContext.mkTr31KeyBlock = tr31;
             RklSessionContext.mkTr31kcv = kcv;
 
@@ -130,7 +141,7 @@ public class RklLoadMkManager {
             boolean injected = injectionManager.injectTr31(
                     tr31,
                     kcv,
-                    (byte) RklSessionContext.mkProfileKey.slotTargetPhy
+                    (byte) mkKey.slotTargetPhy
             );
 
             if (!injected) {
@@ -148,14 +159,5 @@ public class RklLoadMkManager {
             e.printStackTrace();
             return false;
         }
-    }
-
-    //-----------------------------------------
-    // OBTER VALOR PADRÃO
-    //-----------------------------------------
-
-    public boolean loadMk(Object profileKey) {
-        // Sobrecarga para compatibilidade
-        return loadMk();
     }
 }
